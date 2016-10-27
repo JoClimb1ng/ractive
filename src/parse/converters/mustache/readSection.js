@@ -18,6 +18,11 @@ export default function readSection ( parser, tag ) {
 	start = parser.pos;
 
 	if ( parser.matchString( '^' ) ) {
+		// watch out for parent context refs - {{^^/^^/foo}}
+		if ( parser.matchString( '^/' ) ){
+			parser.pos = start;
+			return null;
+		}
 		section = { t: SECTION, f: [], n: SECTION_UNLESS };
 	} else if ( parser.matchString( '#' ) ) {
 		section = { t: SECTION, f: [] };

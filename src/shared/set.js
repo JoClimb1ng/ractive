@@ -8,7 +8,11 @@ export function set ( ractive, pairs ) {
 
 	let i = pairs.length;
 	while ( i-- ) {
-		let [ model, value ] = pairs[i];
+		let [ model, value, keypath ] = pairs[i];
+		if ( !model ) {
+			runloop.end();
+			throw new Error( `Failed to set invalid keypath '${ keypath }'` );
+		}
 		if ( typeof value === 'function' ) value = bind( value, ractive );
 		model.set( value );
 	}
@@ -34,14 +38,14 @@ export function build ( ractive, keypath, value ) {
 	if ( isObject( keypath ) ) {
 		for ( const k in keypath ) {
 			if ( keypath.hasOwnProperty( k ) ) {
-				sets.push.apply( sets, gather( ractive, k ).map( m => [ m, keypath[k] ] ) );
+				sets.push.apply( sets, gather( ractive, k ).map( m => [ m, keypath[k], k ] ) );
 			}
 		}
 
 	}
 	// set a single keypath
 	else {
-		sets.push.apply( sets, gather( ractive, keypath ).map( m => [ m, value ] ) );
+		sets.push.apply( sets, gather( ractive, keypath ).map( m => [ m, value, keypath ] ) );
 	}
 
 	return sets;
